@@ -48,9 +48,37 @@ namespace TechJockeys.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Edit()
+        // GET: /Categories/Edit/5 => fetch & display selected category
+        public IActionResult Edit(int id)
         {
-            return View();
+            // fetch category by id
+            var category = _context.Category.Find(id);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            // pass selected category to view for display in the form
+            return View(category);
+        }
+
+        // POST: /Categories/Edit/5 => update selected category from form submission
+        [HttpPost]
+        public IActionResult Edit([Bind("CategoryId,Name")] Category category)
+        {
+            // validate form inputs
+            if (!ModelState.IsValid)
+            {
+                return View(category);
+            }
+
+            // update db
+            _context.Category.Update(category);
+            _context.SaveChanges();
+
+            // redirect to list
+            return RedirectToAction("Index");
         }
 
         // GET: /Categories/Delete/5 => delete selected category
