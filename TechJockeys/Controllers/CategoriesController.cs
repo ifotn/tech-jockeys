@@ -1,22 +1,51 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TechJockeys.Data;
 using TechJockeys.Models;
 
 namespace TechJockeys.Controllers
 {
     public class CategoriesController : Controller
     {
+        // shared db conn available to all controller methods
+        private readonly ApplicationDbContext _context;
+
+        // constructor w/dp dependency
+        public CategoriesController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            // create empty Category list so view doesn't crash
-            var categories = new List<Category>();
+            // fetch Category list from db using DbSet object
+            var categories = _context.Category.ToList();
 
             // pass empty list to view
             return View(categories);
         }
 
+        // GET: /Categories/Create => show empty Category form
         public IActionResult Create()
         {
             return View();
+        }
+
+        // POST: /Categories/Create => process form submission to create new Category
+        [HttpPost]
+        public IActionResult Create([Bind("Name")] Category category)
+        {
+            // validate input.  Show form again if invalid
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            // create new category & save to db
+            _context.Category.Add(category);
+            _context.SaveChanges();
+
+            // redirect to Index to see updated list of Categories
+            return RedirectToAction("Index");
         }
 
         public IActionResult Edit()
